@@ -25,9 +25,33 @@
  */
 
 #include <stdlib.h>
-#include <stdio.>
+#include <stdio.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <string.h>
+
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+
+struct {} msg;
+
+
 
 int main(int argc, char **argv)
 {
+       /**********************************************************************************************************
+	*
+	*	arguments : 0 : call, 1 : id father, 2 : id child1, 3 : id child2, 4 : id child3
+	*	WORKSTATION INITIALIZATION 
+	*	STAND BY, READY FOR INSTRUCTION
+	*	READ MESSAGE
+	*	ACTION
+	*	
+	**********************************************************************************************************/
+	int nbproduct; // random ?
+	int nb;
+	
 	return 0;
 }
