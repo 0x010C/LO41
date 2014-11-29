@@ -94,6 +94,20 @@ void peli_displayTree(node *N)
 		peli_displayTree(N->suppliers[i]);
 }
 
+void peli_deleteTree(node *N)
+{
+	int i;
+
+	if(N == NULL)
+		return;
+
+	for(i=0; i<N->nbSuppliers; i++)
+		peli_delateTree(N->suppliers[i]);
+
+	free(N->suppliers);
+	free(N);
+}
+
 int peli_createWorkstation(unsigned id, unsigned int cliId, unsigned int deep, unsigned int deepMax, unsigned int breadth)
 {
 	/*int i;
@@ -137,5 +151,6 @@ int main(int argc, char **argv)
 	unsigned int absolute = 0;
 	node *N = peli_initTree(NULL, &absolute, 0, 4, 2);
 	peli_displayTree(N);
+	peli_deleteTree(N);
 	return 0;
 }
