@@ -26,6 +26,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -68,10 +69,13 @@ node *peli_initTree(node *client, unsigned int *absoluteId, unsigned int deep, u
 	N = (node*) malloc(sizeof(node));
 	N->client = client;
 	N->suppliers = (node**) malloc(sizeof(node*)*breadth);
-	N->nbSuppliers = breadth;
 	N->deep = deep;
 	N->id = ++(*absoluteId);
 	N->pid = -1;
+	if(deep+1 >= deepMax)
+		N->nbSuppliers = 0;
+	else
+		N->nbSuppliers = breadth;
 
 	for(i=0; i<breadth; i++)
 		N->suppliers[i] = peli_initTree(N, absoluteId, deep+1, deepMax, breadth);
@@ -85,10 +89,13 @@ void peli_displayTree(node *N)
 
 	if(N == NULL)
 		return;
-
+	printf("\n");
 	for(i=0; i<N->deep; i++)
 		printf("\t");
-	printf("-%d\n", N->id);
+	printf("-->%d!%ld!%d", N->id, (long) N->pid, N->nbSuppliers);
+	if(N->nbSuppliers > 0)
+		printf("(%d!%d)", N->suppliers[0]->id, N->suppliers[1]->id);
+	printf("\n");
 	
 	for(i=0; i<N->nbSuppliers; i++)
 		peli_displayTree(N->suppliers[i]);
@@ -102,54 +109,52 @@ void peli_deleteTree(node *N)
 		return;
 
 	for(i=0; i<N->nbSuppliers; i++)
-		peli_delateTree(N->suppliers[i]);
+		peli_deleteTree(N->suppliers[i]);
 
 	free(N->suppliers);
 	free(N);
 }
 
-int peli_createWorkstation(unsigned id, unsigned int cliId, unsigned int deep, unsigned int deepMax, unsigned int breadth)
+void peli_createWorkstation(node *N)
 {
-	/*int i;
-	char **args = NULL;*/
+	int i;
+	pid_t pid;
+	char **args = NULL;
 
-	/* If we have reached the maximum deep, we stop creating Workstations */	
-	/*if(deep >= deepMax)
-		return 0;*/
-	
-	/* Else, we create first the n-Suppliers */
-	/*for(i=1; i<=breadth; i++)
-	{
-		if(!peli_createWorkstation(id+i, id, deep+1, deepMax, breadth))
-			return 1;
-	}*/
+	if(N == NULL)
+		return;
 
-	/* And then, we create the current Workstation */
-	/*switch(fork())
+	switch(pid=fork())
 	{
 		case -1:
-			return 1;
+			return;
 			break;
-	
+
 		case 0:
-			
-			charDeep = peli_intToChar();
-			if(charDeep == NULL)
-				return 2;
-			execl("./atelier", "atelier", charDeep);
-			return 3;
+			args = (char**) malloc(sizeof(char*)*(N->nbSuppliers+2));
+			args[0] = (char*) malloc(sizeof(char)*(8));
+			strcpy(args[0], "atelier");
+			args[1] = peli_intToChar(N->client->id);
+			for(i=0; i<N->nbSuppliers; i++)
+				args[i+2] = peli_intToChar(N->suppliers[i]->id);
+			execv("./atelier",args);
 			break;
-	
+
 		default:
+			N->pid = pid;
 			break;
-	}*/
-	return 0;
+	}
+
+	if(N->nbSuppliers > 0)
+		for(i=0; i<N->nbSuppliers; i++)
+			peli_createWorkstation(N->suppliers[i]);
 }
 
 int main(int argc, char **argv)
 {
 	unsigned int absolute = 0;
 	node *N = peli_initTree(NULL, &absolute, 0, 4, 2);
+	peli_createWorkstation(N);
 	peli_displayTree(N);
 	peli_deleteTree(N);
 	return 0;
