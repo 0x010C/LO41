@@ -29,6 +29,19 @@
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+
+/*
+Note
+msgget(key, 0750 | IPC_CREAT | IPC_EXCL)
+key = ftok(argv[0], 'A')
+msgsnd(msgid, &requete, sizeof(trequeteClient) - sizeof(long), 0)
+longMSG = msgrcv(msgid, &reponse, sizeof(treponse) - sizeof(long), getpid(), 0)
+
+*/
+
+int msgid;
 
 typedef struct node node;
 struct node
@@ -43,7 +56,7 @@ struct node
 
 enum req_t {
 	REQ_SEND_TICKET,
-	REQ_SEND_CONTAINER;
+	REQ_SEND_CONTAINER
 };
 typedef enum req_t req_t;
 
@@ -56,6 +69,46 @@ struct Message
 	long value;
 };
 
+void peli_initIPC()
+{
+	msgid = msgget(ftok("PeliKanban", 42), 0750 | IPC_CREAT | IPC_EXCL);
+}
+
+void peli_destroyIPC()
+{
+	msgctl(msgid, IPC_RMID, NULL);
+}
+
+void peli_sendIPC(long to, req_t request, long value)
+{
+	int i;
+
+	Message toSend;
+
+	toSend.from = 0;
+	toSend.request = request;
+	toSend.value = value;
+
+	if(to < 0)
+	{
+		for(i=1; i<-to; i++) {
+			toSend.to = i;
+			msgsnd(msgid, &toSend, sizeof(Message) - sizeof(long), 0);
+		}
+	}
+	else
+	{
+		toSend.to = to;
+		msgsnd(msgid, &toSend, sizeof(Message) - sizeof(long), 0);
+	}
+}
+
+req_t peli_getIPC(int flag)
+{
+	req_t letter;
+	msgrcv(msgid, &letter, sizeof(Message) - sizeof(long), 0, flag);
+	return letter;
+}
 
 char *peli_intToChar(int nb)
 {
