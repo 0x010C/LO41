@@ -35,8 +35,20 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
-struct {} msg;
+enum req_t {
+	REQ_SEND_TICKET,
+	REQ_SEND_CONTAINER;
+};
+typedef enum req_t req_t;
 
+typedef struct Message Message;
+struct Message
+{
+	long to;
+	long from;
+	req_t request;
+	long value;
+};
 
 
 int main(int argc, char **argv)
@@ -50,8 +62,6 @@ int main(int argc, char **argv)
 	*	ACTION
 	*	
 	**********************************************************************************************************/
-	int nbproduct; // random ?
-	int nb;
 	
 	return 0;
 }

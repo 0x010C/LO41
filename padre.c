@@ -31,7 +31,8 @@
 #include <unistd.h>
 
 typedef struct node node;
-struct node {
+struct node
+{
 	node *client;
 	node **suppliers;
 	unsigned int deep;
@@ -39,6 +40,22 @@ struct node {
 	unsigned int id;
 	pid_t pid;
 };
+
+enum req_t {
+	REQ_SEND_TICKET,
+	REQ_SEND_CONTAINER;
+};
+typedef enum req_t req_t;
+
+typedef struct Message Message;
+struct Message
+{
+	long to;
+	long from;
+	req_t request;
+	long value;
+};
+
 
 char *peli_intToChar(int nb)
 {
