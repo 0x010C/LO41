@@ -147,6 +147,17 @@ node *peli_initTree(node *client, unsigned int *absoluteId, unsigned int deep, u
 	else
 		N->nbSuppliers = breadth;
 
+	if(client == NULL)
+	{
+		N->client = (node*) malloc(sizeof(node));
+		N->client->suppliers = (node**) malloc(sizeof(node*));
+		N->client->deep = deep-1;
+		N->client->id = 1;
+		N->client->pid = getpid();
+		N->client->nbSuppliers = 1;
+		N->client->suppliers[0] = N;
+	}
+
 	for(i=0; i<breadth; i++)
 		N->suppliers[i] = peli_initTree(N, absoluteId, deep+1, deepMax, breadth);
 
@@ -227,7 +238,7 @@ void peli_createWorkstation(node *N)
 int main(int argc, char **argv)
 {
 	unsigned int absolute = 1;
-	node *N = peli_initTree(NULL, &absolute, 0, 4, 2);
+	node *N = peli_initTree(NULL, &absolute, 1, 5, 2);
 	peli_createWorkstation(N);
 	peli_displayTree(N);
 	peli_deleteTree(N);
