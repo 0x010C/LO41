@@ -103,9 +103,9 @@ void peli_sendIPC(long to, req_t request, long value)
 	}
 }
 
-req_t peli_getIPC(int flag)
+Message peli_rcvIPC(int flag)
 {
-	req_t letter;
+	Message letter;
 	msgrcv(msgid, &letter, sizeof(Message) - sizeof(long), 0, flag);
 	return letter;
 }
@@ -237,10 +237,20 @@ void peli_createWorkstation(node *N)
 
 int main(int argc, char **argv)
 {
+	int i;
 	unsigned int absolute = 1;
+	Message tmp;
+	peli_initIPC();
 	node *N = peli_initTree(NULL, &absolute, 1, 5, 2);
 	peli_createWorkstation(N);
-	peli_displayTree(N);
+	
+	for(i=0; i<absolute-1; i++)
+	{
+		tmp = peli_rcvIPC(0);
+		printf("To:%ld\nFrom:%ld\nRequest:%d\nValue:%ld\n\n", tmp.to, tmp.from, (int) tmp.request, tmp.value);
+	}
+	
 	peli_deleteTree(N);
+	peli_destroyIPC();
 	return 0;
 }

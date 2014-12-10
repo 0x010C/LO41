@@ -50,6 +50,46 @@ struct Message
 	long value;
 };
 
+int msgid;
+int myId;
+int clientId;
+int *suppliersId;
+
+void peli_initIPC()
+{
+	msgid = msgget(ftok("PeliKanban", 42), 0);
+}
+
+void peli_sendIPC(long to, req_t request, long value)
+{
+	int i;
+
+	Message toSend;
+
+	toSend.from = myId;
+	toSend.request = request;
+	toSend.value = value;
+
+	if(to < 0)
+	{
+		for(i=1; i<-to; i++) {
+			toSend.to = i;
+			msgsnd(msgid, &toSend, sizeof(Message) - sizeof(long), 0);
+		}
+	}
+	else
+	{
+		toSend.to = to;
+		msgsnd(msgid, &toSend, sizeof(Message) - sizeof(long), 0);
+	}
+}
+
+Message peli_rcvIPC(int flag)
+{
+	Message letter;
+	msgrcv(msgid, &letter, sizeof(Message) - sizeof(long), 0, flag);
+	return letter;
+}
 
 int main(int argc, char **argv)
 {
@@ -62,12 +102,16 @@ int main(int argc, char **argv)
 	*	ACTION
 	*	
 	**********************************************************************************************************/
-	if(argc == 5)
-		printf("<%s>\n    Client : %s\n    Fournisseurs : {%s;%s}\n", argv[1], argv[2], argv[3], argv[4]);
-	else if(argc == 3)
-		printf("<%s>\n    Client : %s\n    Fournisseurs : {}\n", argv[1], argv[2]);
-	else
-		printf("ARGC\n");
+	int i;
+	
+	myId = atoi(argv[1]);
+	clientId = atoi(argv[2]);
+	suppliersId = (int*) malloc(sizeof(int)*(argc-3));
+	for(i=0; i<argc-3; i++)
+		suppliersId[i] = atoi(argv[i+3]);
+	
+	peli_initIPC();
+	peli_sendIPC(1, 17, 5);
 	
 	return 0;
 }
