@@ -226,7 +226,7 @@ void peli_createWorkstation(node *N)
 
 int main(int argc, char **argv)
 {
-	unsigned int absolute = 0;
+	unsigned int absolute = 1;
 	node *N = peli_initTree(NULL, &absolute, 0, 4, 2);
 	peli_createWorkstation(N);
 	peli_displayTree(N);
