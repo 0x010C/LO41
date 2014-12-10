@@ -37,7 +37,7 @@
 
 enum req_t {
 	REQ_SEND_TICKET,
-	REQ_SEND_CONTAINER;
+	REQ_SEND_CONTAINER
 };
 typedef enum req_t req_t;
 
@@ -62,6 +62,12 @@ int main(int argc, char **argv)
 	*	ACTION
 	*	
 	**********************************************************************************************************/
+	if(argc == 5)
+		printf("<%s>\n    Client : %s\n    Fournisseurs : {%s;%s}\n", argv[1], argv[2], argv[3], argv[4]);
+	else if(argc == 3)
+		printf("<%s>\n    Client : %s\n    Fournisseurs : {}\n", argv[1], argv[2]);
+	else
+		printf("ARGC\n");
 	
 	return 0;
 }

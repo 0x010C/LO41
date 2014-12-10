@@ -201,13 +201,17 @@ void peli_createWorkstation(node *N)
 			break;
 
 		case 0:
-			args = (char**) malloc(sizeof(char*)*(N->nbSuppliers+2));
+			args = (char**) malloc(sizeof(char*)*(N->nbSuppliers+4));
 			args[0] = (char*) malloc(sizeof(char)*(8));
 			strcpy(args[0], "atelier");
-			args[1] = peli_intToChar(N->client->id);
+			args[1] = peli_intToChar(N->id);
+			args[2] = peli_intToChar(N->client->id);
 			for(i=0; i<N->nbSuppliers; i++)
-				args[i+2] = peli_intToChar(N->suppliers[i]->id);
+				args[i+3] = peli_intToChar(N->suppliers[i]->id);
+			args[i+3] = NULL;
 			execv("./atelier",args);
+			printf("ERRNO\n");
+			exit(1);
 			break;
 
 		default:
