@@ -37,7 +37,11 @@
 
 enum req_t {
 	REQ_SEND_TICKET,
-	REQ_SEND_CONTAINER
+	REQ_SEND_CONTAINER,
+	REQ_PING,
+	REQ_REPLY_PING,
+	REQ_SHUTDOWN,
+	REQ_CONFIRM_SHUTDOWN
 };
 typedef enum req_t req_t;
 
@@ -87,7 +91,7 @@ void peli_sendIPC(long to, req_t request, long value)
 Message peli_rcvIPC(int flag)
 {
 	Message letter;
-	msgrcv(msgid, &letter, sizeof(Message) - sizeof(long), 0, flag);
+	msgrcv(msgid, &letter, sizeof(Message) - sizeof(long), myId, flag);
 	return letter;
 }
 
@@ -103,6 +107,8 @@ int main(int argc, char **argv)
 	*	
 	**********************************************************************************************************/
 	int i;
+	Message m;
+	m.request = -1;
 	
 	myId = atoi(argv[1]);
 	clientId = atoi(argv[2]);
@@ -111,7 +117,19 @@ int main(int argc, char **argv)
 		suppliersId[i] = atoi(argv[i+3]);
 	
 	peli_initIPC();
-	peli_sendIPC(1, 17, 5);
 	
+	while(m.request != REQ_SHUTDOWN)
+	{
+		m = peli_rcvIPC(0);
+		switch(m.request)
+		{
+			case REQ_PING:
+				peli_sendIPC(m.from, REQ_REPLY_PING, m.value);
+				break;
+		}
+	}
+
+	peli_sendIPC(1, REQ_CONFIRM_SHUTDOWN, 0);
+
 	return 0;
 }

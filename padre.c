@@ -56,7 +56,11 @@ struct node
 
 enum req_t {
 	REQ_SEND_TICKET,
-	REQ_SEND_CONTAINER
+	REQ_SEND_CONTAINER,
+	REQ_PING,
+	REQ_REPLY_PING,
+	REQ_SHUTDOWN,
+	REQ_CONFIRM_SHUTDOWN
 };
 typedef enum req_t req_t;
 
@@ -85,7 +89,7 @@ void peli_sendIPC(long to, req_t request, long value)
 
 	Message toSend;
 
-	toSend.from = 0;
+	toSend.from = 1;
 	toSend.request = request;
 	toSend.value = value;
 
@@ -106,7 +110,7 @@ void peli_sendIPC(long to, req_t request, long value)
 Message peli_rcvIPC(int flag)
 {
 	Message letter;
-	msgrcv(msgid, &letter, sizeof(Message) - sizeof(long), 0, flag);
+	msgrcv(msgid, &letter, sizeof(Message) - sizeof(long), 1, flag);
 	return letter;
 }
 
@@ -244,10 +248,38 @@ int main(int argc, char **argv)
 	node *N = peli_initTree(NULL, &absolute, 1, 5, 2);
 	peli_createWorkstation(N);
 	
-	for(i=0; i<absolute-1; i++)
+	for(i=2; i<absolute+1; i++)
+	{
+		printf("Envoie d'un PING à <%d>\n", i);
+		peli_sendIPC(i, REQ_PING, 0);
+	}
+	
+	for(i=2; i<absolute+1; i++)
 	{
 		tmp = peli_rcvIPC(0);
-		printf("To:%ld\nFrom:%ld\nRequest:%d\nValue:%ld\n\n", tmp.to, tmp.from, (int) tmp.request, tmp.value);
+		switch(tmp.request)
+		{
+			case REQ_REPLY_PING:
+				printf("<%ld> a répondu au PING\n", tmp.from);
+				break;
+		}
+	}
+	
+	for(i=2; i<absolute+1; i++)
+	{
+		printf("Demande d'arrêt à <%d>\n", i);
+		peli_sendIPC(i, REQ_SHUTDOWN, 0);
+	}
+
+	for(i=2; i<absolute+1; i++)
+	{
+		tmp = peli_rcvIPC(0);
+		switch(tmp.request)
+		{
+			case REQ_CONFIRM_SHUTDOWN:
+				printf("<%ld> c'est arrêté\n", tmp.from);
+				break;
+		}
 	}
 	
 	peli_deleteTree(N);
