@@ -35,13 +35,21 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
+enum bool {
+	false,
+	true
+};
+typedef enum bool bool;
+
 enum req_t {
+	REQ_NULL,
 	REQ_SEND_TICKET,
 	REQ_SEND_CONTAINER,
 	REQ_PING,
 	REQ_REPLY_PING,
 	REQ_SHUTDOWN,
-	REQ_CONFIRM_SHUTDOWN
+	REQ_CONFIRM_SHUTDOWN,
+	REQ_INFORM_NB_IN_CONTAINER
 };
 typedef enum req_t req_t;
 
@@ -55,9 +63,9 @@ struct Message
 };
 
 int msgid;
-int myId;
-int clientId;
-int *suppliersId;
+unsigned int myId;
+unsigned int clientId;
+unsigned int *suppliersId;
 
 void peli_initIPC()
 {
@@ -93,7 +101,7 @@ Message peli_rcvIPC(int flag)
 	Message letter;
 	letter.to = -1;
 	letter.from = -1;
-	letter.request = -1;
+	letter.request = REQ_NULL;
 	letter.value = -1;
 	msgrcv(msgid, &letter, sizeof(Message) - sizeof(long), myId, flag);
 	return letter;
@@ -110,26 +118,82 @@ int main(int argc, char **argv)
 	*	ACTION
 	*	
 	**********************************************************************************************************/
-	int i;
+	int i, j;
 	Message m;
 	m.request = -1;
-	
+	bool taskWaiting = false;
+	int flag;
+	unsigned int nbSuppliers;
+	unsigned int nbContainerToProduce = 0;
+	unsigned int **container;
+	unsigned int nbInContainer = rand()%100+1;
+
+	peli_initIPC();
+
 	myId = atoi(argv[1]);
 	clientId = atoi(argv[2]);
 	suppliersId = (int*) malloc(sizeof(int)*(argc-3));
-	for(i=0; i<argc-3; i++)
+	nbSuppliers = argc-3;
+	container = (unsigned int**) malloc(sizeof(unsigned int*)*(nbSuppliers));
+	for(i=0; i<nbSuppliers; i++)
+	{
 		suppliersId[i] = atoi(argv[i+3]);
+		
+		container[i] = (unsigned int*) malloc(sizeof(unsigned int)*3);
+		container[i][0] = suppliersId[i];
+		container[i][1] = 0;
+		container[i][2] = 0;
+	}
+
+	/*peli_sendIPC(clientId, REQ_INFORM_NB_IN_CONTAINER, nbInContainer);
+	if(nbSuppliers>0)printf("[[%d]] send value '%d' to client %d\n", myId, nbInContainer, clientId);
+	fflush(stdout);
+	for(i=0; i<nbSuppliers; i++)
+	{
+		do {
+			printf("{{%d}} wait\n", myId);
+			fflush(stdout);
+			m = peli_rcvIPC(0);
+			printf("{{%d}} recived\n\tto:%ld\n\tfrom:%ld\n\trequest:%d\n\tvalue:%ld\n", myId, m.to, m.from, m.request, m.value);
+			fflush(stdout);
+		}while(m.request != REQ_INFORM_NB_IN_CONTAINER);
+		printf("==%d== Start looping (%ld)\n", myId, m.from);
+		fflush(stdout);
+		j=0;
+		while(container[j][0] != m.from)
+			j++;
+		container[j][1] = m.value;
+		container[j][2] = m.value;
+		printf("==%d== End looping ([%d]%d)\n", myId, j, container[j][0]);
+		fflush(stdout);
+	}
+	if(nbSuppliers>0)printf("##%d## END OF INIT\n", myId);
+	fflush(stdout);*/
 	
-	peli_initIPC();
+	peli_sendIPC(clientId, REQ_INFORM_NB_IN_CONTAINER, nbInContainer);
+	
 	
 	while(m.request != REQ_SHUTDOWN)
 	{
-		m = peli_rcvIPC(0);
+		if(taskWaiting)
+			flag = IPC_NOWAIT;
+		else
+			flag = 0;
+		m = peli_rcvIPC(flag);
 		switch(m.request)
 		{
+			case -1:
+				break;
 			case REQ_PING:
 				peli_sendIPC(m.from, REQ_REPLY_PING, m.value);
 				break;
+			case REQ_SEND_TICKET:
+				nbContainerToProduce++;
+				break;
+			case REQ_SEND_CONTAINER:
+				
+				break;
+			
 		}
 	}
 
