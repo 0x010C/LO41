@@ -55,12 +55,12 @@ struct node
 };
 
 enum req_t {
-	REQ_SEND_TICKET,
-	REQ_SEND_CONTAINER,
-	REQ_PING,
-	REQ_REPLY_PING,
-	REQ_SHUTDOWN,
-	REQ_CONFIRM_SHUTDOWN
+	REQ_SEND_TICKET=0,
+	REQ_SEND_CONTAINER=1,
+	REQ_PING=2,
+	REQ_REPLY_PING=3,
+	REQ_SHUTDOWN=4,
+	REQ_CONFIRM_SHUTDOWN=5
 };
 typedef enum req_t req_t;
 
@@ -109,12 +109,12 @@ void peli_sendIPC(long to, req_t request, long value)
 
 Message peli_rcvIPC(int flag)
 {
-	Message letter;
+	Message letter;/*
 	letter.to = -1;
 	letter.from = -1;
 	letter.request = -1;
-	letter.value = -1;
-	msgrcv(msgid, &letter, sizeof(Message) - sizeof(long), 1, flag | MSG_NOERROR);
+	letter.value = -1;*/
+	msgrcv(msgid, &letter, sizeof(Message) - sizeof(long), 1, flag);
 	return letter;
 }
 
@@ -269,6 +269,26 @@ void displayPelikanbanlogo ()
 	printf("                Welcome and Greatings in PeliKanban\n\n");
 }
 
+/*
+void HMI_createfactory ()
+{	
+	unsigned int absolute = 1, depth, suppliers;
+	printf("To create a factory, you need to imput some parameters to define the production line :\n");
+	printf(" -> The depth of the production line : ");
+	scanf("%d",&depth);
+	printf("%d\n", depth);
+	printf(" -> The number of supplier workshops per workshop : ");
+	scanf("%d",&suppliers);
+	printf("%d\n", suppliers);
+	printf("Thank you ! Initialization in process\n");
+
+	peli_initIPC();
+	node *N = peli_initTree(NULL, &absolute, 1, depth, suppliers);
+	peli_createWorkstation(N);
+	printf("Initialization Completed\n");
+
+}
+
 void HMI ()
 {
 	int choice;
@@ -286,20 +306,27 @@ void HMI ()
 		scanf("%d",&choice);
 		printf("\n");
 	}
-	
+	switch(choice)
+	{
+		case 1:
+			HMI_createfactory();
+			break;
+		case 9:  //a redefinir
+			break;
 }
-
+*/
 
 /************************** HMI *********************************************************/
 int main(int argc, char **argv)
 {
 	int i;
-	unsigned int absolute = 1;
 	Message tmp;
+	unsigned int absolute = 1;
+
 	peli_initIPC();
 	node *N = peli_initTree(NULL, &absolute, 1, 5, 2);
 	peli_createWorkstation(N);
-	HMI ();
+	//HMI ();
 	for(i=2; i<absolute+1; i++)
 	{
 		printf("Envoie d'un PING à <%d>\n", i);
@@ -313,6 +340,9 @@ int main(int argc, char **argv)
 		{
 			case REQ_REPLY_PING:
 				printf("<%ld> a répondu au PING\n", tmp.from);
+				break;
+			default:
+				printf("<%ld> a répondu : %d\n", tmp.from, tmp.request);
 				break;
 		}
 	}
