@@ -110,6 +110,10 @@ void peli_sendIPC(long to, req_t request, long value)
 Message peli_rcvIPC(int flag)
 {
 	Message letter;
+	letter.to = -1;
+	letter.from = -1;
+	letter.request = -1;
+	letter.value = -1;
 	msgrcv(msgid, &letter, sizeof(Message) - sizeof(long), 1, flag);
 	return letter;
 }
