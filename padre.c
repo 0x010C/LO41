@@ -114,7 +114,7 @@ Message peli_rcvIPC(int flag)
 	letter.from = -1;
 	letter.request = -1;
 	letter.value = -1;
-	msgrcv(msgid, &letter, sizeof(Message) - sizeof(long), 1, flag);
+	msgrcv(msgid, &letter, sizeof(Message) - sizeof(long), 1, flag | MSG_NOERROR);
 	return letter;
 }
 
@@ -242,7 +242,55 @@ void peli_createWorkstation(node *N)
 		for(i=0; i<N->nbSuppliers; i++)
 			peli_createWorkstation(N->suppliers[i]);
 }
+/************************** HMI *********************************************************/
+void displayPelikanbanlogo ()
+{
+	printf("\n\n************************************************************************\n");
+	printf("*                                             _______                  *\n");	
+	printf("*                                         _.-'       ''...._           *\n");
+	printf("*     PeliKanban                        .'        .--.    '.`          *\n");
+	printf("*                                      : .--.    :    :     '-.        *\n");
+	printf("*       LO41 Project                  : :    :   :    :       :`       *\n");
+	printf("*                                     : :  @ :___:  @ : __     '`.     *\n");
+	printf("*                                 __..:---''''   `----''  `.   .'      *\n");
+	printf("*                         __..--''                   ___j  :   :       *\n");
+	printf("*                 __..--''    .--'             __..''      :    `.     *\n");
+	printf("*           ..--''                     __..--''        __..'   /``     *\n");
+	printf("*         .'                   __..--''        __..--''       /        *\n");
+	printf("*        :             __..--''        __..--''               \\        *\n");
+	printf("*       :        _.--''        __..--''    :                :`.:       *\n");
+	printf("*      :     _.-'      __..--''             :              /           *\n");
+	printf("*      :   .'  __..--''                      \\            /            *\n");
+	printf("*      \\  :--''                               \\          .'            *\n");
+	printf("*       \\ :                                    :         :             *\n");
+	printf("*        \\:                                     :        \\             *\n");
+	printf("*         '                                     :         \\            *\n");
+	printf("************************************************************************\n\n");
+	printf("                Welcome and Greatings in PeliKanban\n\n");
+}
 
+void HMI ()
+{
+	int choice;
+	displayPelikanbanlogo();
+
+	printf("\n Please select an option :\n");
+	printf("1 - Create a factory\n");
+	printf("9 - Quit\n");
+	printf("Your Choice : ");
+	scanf("%d",&choice);
+	printf("%d\n", choice);
+	while(choice != 1 && choice != 9)
+	{
+		printf("Wrong input, Please try again\nYour Choice : ");
+		scanf("%d",&choice);
+		printf("\n");
+	}
+	
+}
+
+
+/************************** HMI *********************************************************/
 int main(int argc, char **argv)
 {
 	int i;
@@ -251,7 +299,7 @@ int main(int argc, char **argv)
 	peli_initIPC();
 	node *N = peli_initTree(NULL, &absolute, 1, 5, 2);
 	peli_createWorkstation(N);
-	
+	HMI ();
 	for(i=2; i<absolute+1; i++)
 	{
 		printf("Envoie d'un PING à <%d>\n", i);
