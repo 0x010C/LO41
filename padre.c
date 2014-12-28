@@ -24,6 +24,13 @@
 		51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+
+/*
+ * ----------------------------
+ * INCLUDES
+ * ----------------------------
+*/
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -32,17 +39,31 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 
-/*
-Note
-msgget(key, 0750 | IPC_CREAT | IPC_EXCL)
-key = ftok(argv[0], 'A')
-msgsnd(msgid, &requete, sizeof(trequeteClient) - sizeof(long), 0)
-longMSG = msgrcv(msgid, &reponse, sizeof(treponse) - sizeof(long), getpid(), 0)
 
+/*
+ * ----------------------------
+ * GLOBAL VARIABLES
+ * ----------------------------
 */
 
 int msgid;
 
+
+/*
+ * ----------------------------
+ * STRUCTUReS
+ * ----------------------------
+*/
+
+/*
+ * struct node :
+ * - Pointer on the client node							client<node*>
+ * - Array of pointers on the suppliers nodes			suppliers<node**> 
+ * - Deep of the node relative to the root node			deep<unsigned int>
+ * - Number of suppliers								nbSuppliers<unsigned int>
+ * - Internal workshop ID (IWID)						id<unsigned int>
+ * - Process ID of the workshop attached to the node	pid<pid_t>
+ */
 typedef struct node node;
 struct node
 {
@@ -54,6 +75,10 @@ struct node
 	pid_t pid;
 };
 
+/*
+ * enum req_t
+ * All the possible requests types that the workshops can send to the other one
+ */
 enum req_t {
 	REQ_SEND_TICKET,
 	REQ_SEND_CONTAINER,
@@ -64,6 +89,13 @@ enum req_t {
 };
 typedef enum req_t req_t;
 
+/*
+ * struct Message :
+ * - IWID of the message recipient			to<long>
+ * - IWID of the message sender				from<long>
+ * - Request type attached to the message	request<req_t>
+ * - Value attached to the message			value<long>
+ */
 typedef struct Message Message;
 struct Message
 {
@@ -73,16 +105,46 @@ struct Message
 	long value;
 };
 
+
+/*
+ * ----------------------------
+ * FUNCTIONS
+ * ----------------------------
+*/
+
+/*
+ * -------- peli_initIPC --------
+ * Description : Create and initialise the IPC object
+ * Parameters :
+ * Return : nothing but set the global variable msgid
+ * ------------------------------
+ */
 void peli_initIPC()
 {
 	msgid = msgget(ftok("PeliKanban", 42), 0750 | IPC_CREAT | IPC_EXCL);
 }
 
+/*
+ * -------- peli_destroyIPC --------
+ * Description : Destroy the IPC object
+ * Parameters :
+ * Return :
+ * ---------------------------------
+ */
 void peli_destroyIPC()
 {
 	msgctl(msgid, IPC_RMID, NULL);
 }
 
+/*
+ * -------- peli_sendIPC --------
+ * Description : Send an IPC message
+ * Parameters : - The IWID of the receiver			to<long>
+ *              - The type of the request			request<req_t>
+ *              - The value to join to the message	value<long>
+ * Return :
+ * ------------------------------
+ */
 void peli_sendIPC(long to, req_t request, long value)
 {
 	int i;
@@ -107,6 +169,13 @@ void peli_sendIPC(long to, req_t request, long value)
 	}
 }
 
+/*
+ * -------- peli_rcvIPC --------
+ * Description : Check if there is one message for me, if not wait or pass depending of the value of the flag
+ * Parameters : Flag passing to msgrcv, will specify for example if the process wait or not (IPC_NOWAIT) when there is no messages		flag<int>
+ * Return : the message recieved, or message null if no message where get																letter<Message>
+ * -----------------------------
+ */
 Message peli_rcvIPC(int flag)
 {
 	Message letter;
@@ -114,6 +183,13 @@ Message peli_rcvIPC(int flag)
 	return letter;
 }
 
+/*
+ * -------- peli_intToChar --------
+ * Description : Convert an integer into a string
+ * Parameters : the integer to convert			nb<int>
+ * Return : the dynamicaly allocated string		result<char*>
+ * --------------------------------
+ */
 char *peli_intToChar(int nb)
 {
 	int i;
@@ -132,6 +208,17 @@ char *peli_intToChar(int nb)
 	return result;
 }
 
+/*
+ * -------- peli_initTree --------
+ * Description : Allocate and initialise recursively the tree representing the hierarchy of the Workshops
+ * Parameters : - The client node (the father in the tree)				client<node*>
+ *              - A pointer to a variable representing the IWID to use	absoluteId<int*>
+ *              - The current node's depth in the tree					deep<unsigned int>
+ *              - The maximum deep in the tree							deepMax<unsigned int>
+ *              - The numbre of suppliers of each Workshop				breadth<unsigned int>
+ * Return : The initialised node										N<node*>
+ * -------------------------------
+ */
 node *peli_initTree(node *client, unsigned int *absoluteId, unsigned int deep, unsigned int deepMax, unsigned int breadth)
 {
 	node *N;
@@ -168,6 +255,13 @@ node *peli_initTree(node *client, unsigned int *absoluteId, unsigned int deep, u
 	return N;
 }
 
+/*
+ * -------- peli_intToChar --------
+ * Description : Display the tree in the consol
+ * Parameters : the tree's root node	N<node*>
+ * Return : 
+ * --------------------------------
+ */
 void peli_displayTree(node *N)
 {
 	int i;
@@ -186,6 +280,13 @@ void peli_displayTree(node *N)
 		peli_displayTree(N->suppliers[i]);
 }
 
+/*
+ * -------- peli_deleteTree --------
+ * Description : Display the tree in the consol
+ * Parameters : the tree's root node	N<node*>
+ * Return : 
+ * ---------------------------------
+ */
 void peli_deleteTree(node *N)
 {
 	int i;
