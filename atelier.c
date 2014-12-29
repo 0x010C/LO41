@@ -139,17 +139,31 @@ int main(int argc, char **argv)
 	for(i=0; i<nbSuppliers; i++)
 	{
 		suppliersId[i] = atoi(argv[i+3]);
-		container[i] = (unsigned int*) malloc(sizeof(unsigned int)*3);
-		container[i][0] = suppliersId[i];
+		container[i] = (unsigned int*) malloc(sizeof(unsigned int)*2);
+		container[i][0] = 0;
 		container[i][1] = 0;
-		container[i][2] = 0;
 	}
 
 	for(i=0; i<nbSuppliers; i++)
 	{
 		m = peli_rcvIPC(0);
 		if(m.request == REQ_INFORM_NB_IN_CONTAINER)
+		{
 			printf("> %d recieved info from %ld (%ld)\n", myId, m.from, m.value);
+			j=0;
+			while(j < nbSuppliers)
+			{
+				printf("\t\t[%d : %d <> %ld]\n", myId, suppliersId[j], m.from);
+				if(suppliersId[j] == m.from)
+				{
+					container[j][0] = m.value;
+					container[j][1] = m.value;
+					printf("\t{%d saved value %ld in suppliers %d}\n", myId, m.value,suppliersId[j]);
+					break;
+				}
+				j++;
+			}
+		}
 	}
 	sleep(4);
 	printf("< %d send info to %d\n", myId, clientId);

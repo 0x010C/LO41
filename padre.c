@@ -445,7 +445,7 @@ int main(int argc, char **argv)
 		peli_sendIPC(m.from, REQ_REPLY_PING, 0);
 	
 	peli_deleteTree(N);
-	sleep(5);
+	sleep(7);
 	peli_destroyIPC();
 	return 0;
 }
