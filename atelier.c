@@ -23,90 +23,8 @@
 		with this program; if not, write to the Free Software Foundation, Inc.,
 		51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include "header.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <time.h>
-#include <pthread.h>
-#include <semaphore.h>
-#include <string.h>
-
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/ipc.h>
-#include <sys/msg.h>
-
-enum bool {
-	false,
-	true
-};
-typedef enum bool bool;
-
-enum req_t {
-	REQ_NULL,
-	REQ_SEND_TICKET,
-	REQ_SEND_CONTAINER,
-	REQ_PING,
-	REQ_REPLY_PING,
-	REQ_SHUTDOWN,
-	REQ_CONFIRM_SHUTDOWN,
-	REQ_INFORM_NB_IN_CONTAINER
-};
-typedef enum req_t req_t;
-
-typedef struct Message Message;
-struct Message
-{
-	long to;
-	long from;
-	req_t request;
-	long value;
-};
-
-int msgid;
-unsigned int myId;
-unsigned int clientId;
-unsigned int *suppliersId;
-
-void peli_initIPC()
-{
-	msgid = msgget(ftok("PeliKanban", 42), 0);
-}
-
-void peli_sendIPC(long to, req_t request, long value)
-{
-	int i;
-
-	Message toSend;
-
-	toSend.from = myId;
-	toSend.request = request;
-	toSend.value = value;
-
-	if(to < 0)
-	{
-		for(i=1; i<-to; i++) {
-			toSend.to = i;
-			msgsnd(msgid, &toSend, sizeof(Message) - sizeof(long), 0);
-		}
-	}
-	else
-	{
-		toSend.to = to;
-		msgsnd(msgid, &toSend, sizeof(Message) - sizeof(long), 0);
-	}
-}
-
-Message peli_rcvIPC(int flag)
-{
-	Message letter;
-	letter.to = -1;
-	letter.from = -1;
-	letter.request = REQ_NULL;
-	letter.value = -1;
-	msgrcv(msgid, &letter, sizeof(Message) - sizeof(long), myId, flag);
-	return letter;
-}
 
 int main(int argc, char **argv)
 {
@@ -120,7 +38,7 @@ int main(int argc, char **argv)
 	unsigned int **container;
 	unsigned int nbInContainer;
 
-	peli_initIPC();
+	ipc_init(false);
 
 	myId = atoi(argv[1]);
 	clientId = atoi(argv[2]);
@@ -139,7 +57,7 @@ int main(int argc, char **argv)
 
 	for(i=0; i<nbSuppliers; i++)
 	{
-		m = peli_rcvIPC(0);
+		m = ipc_rcv(0);
 		if(m.request == REQ_INFORM_NB_IN_CONTAINER)
 		{
 			printf("> %d recieved info from %ld (%ld)\n", myId, m.from, m.value);
@@ -164,7 +82,7 @@ int main(int argc, char **argv)
 		nbInContainer = myId*7+rand()%7;
 	sleep(1);
 	printf("< %d send info %d to %d\n", myId, nbInContainer, clientId);
-	peli_sendIPC(clientId, REQ_INFORM_NB_IN_CONTAINER, nbInContainer);
+	ipc_send(clientId, REQ_INFORM_NB_IN_CONTAINER, nbInContainer);
 	sleep(2);
 	printf("= end of transmissions for %d\n", myId);
 
