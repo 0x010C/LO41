@@ -26,6 +26,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <time.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <string.h>
@@ -109,15 +110,6 @@ Message peli_rcvIPC(int flag)
 
 int main(int argc, char **argv)
 {
-       /**********************************************************************************************************
-	*
-	*	arguments : 0 : call, 1 : id father, 2 : id child1, 3 : id child2, 4 : id child3
-	*	WORKSTATION INITIALIZATION 
-	*	STAND BY, READY FOR INSTRUCTION
-	*	READ MESSAGE
-	*	ACTION
-	*	
-	**********************************************************************************************************/
 	int i, j;
 	Message m;
 	m.request = -1;
@@ -126,7 +118,7 @@ int main(int argc, char **argv)
 	unsigned int nbSuppliers;
 	unsigned int nbContainerToProduce = 0;
 	unsigned int **container;
-	unsigned int nbInContainer = rand()%100+1;
+	unsigned int nbInContainer;
 
 	peli_initIPC();
 
@@ -135,6 +127,7 @@ int main(int argc, char **argv)
 	suppliersId = (int*) malloc(sizeof(int)*(argc-3));
 	nbSuppliers = argc-3;
 	container = (unsigned int**) malloc(sizeof(unsigned int*)*(nbSuppliers));
+	srand(myId+time(NULL));
 
 	for(i=0; i<nbSuppliers; i++)
 	{
@@ -165,10 +158,14 @@ int main(int argc, char **argv)
 			}
 		}
 	}
-	sleep(4);
-	printf("< %d send info to %d\n", myId, clientId);
-	peli_sendIPC(clientId, REQ_INFORM_NB_IN_CONTAINER, 10*myId);
-	sleep(5);
+	if(myId == 2)
+		nbInContainer = 1;
+	else
+		nbInContainer = myId*7+rand()%7;
+	sleep(1);
+	printf("< %d send info %d to %d\n", myId, nbInContainer, clientId);
+	peli_sendIPC(clientId, REQ_INFORM_NB_IN_CONTAINER, nbInContainer);
+	sleep(2);
 	printf("= end of transmissions for %d\n", myId);
 
 	return 0;
