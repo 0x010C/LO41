@@ -145,22 +145,17 @@ int main(int argc, char **argv)
 		container[i][2] = 0;
 	}
 
-	peli_sendIPC(clientId, REQ_PING, 0);
-	printf("= %d send ping to client %d\n", myId, clientId);
-	sleep(1);
-	for(i=0; i<nbSuppliers+1; i++)
+	for(i=0; i<nbSuppliers; i++)
 	{
 		m = peli_rcvIPC(0);
-		if(m.request == REQ_PING)
-		{
-			printf("> %d recieved ping from %ld, send reply\n", myId, m.from);
-			peli_sendIPC(m.from, REQ_REPLY_PING, 0);
-		}
-		else if (m.request == REQ_REPLY_PING)
-			printf("< %d recieved reply from %ld\n", myId, m.from);
+		if(m.request == REQ_INFORM_NB_IN_CONTAINER)
+			printf("> %d recieved info from %ld (%ld)\n", myId, m.from, m.value);
 	}
-	sleep(1);
-	printf("= end of pings for %d\n", myId);
+	sleep(4);
+	printf("< %d send info to %d\n", myId, clientId);
+	peli_sendIPC(clientId, REQ_INFORM_NB_IN_CONTAINER, 10*myId);
+	sleep(5);
+	printf("= end of transmissions for %d\n", myId);
 
 	return 0;
 }

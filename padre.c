@@ -124,6 +124,11 @@ struct Message
 void peli_initIPC()
 {
 	msgid = msgget(ftok("PeliKanban", 42), 0750 | IPC_CREAT | IPC_EXCL);
+	if(msgid == -1)
+	{
+		printf("Error : Cannot create an IPC object\n");
+		exit(1);
+	}
 }
 
 /*
