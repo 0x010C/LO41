@@ -80,12 +80,14 @@ struct node
  * All the possible requests types that the workshops can send to the other one
  */
 enum req_t {
-	REQ_SEND_TICKET=0,
-	REQ_SEND_CONTAINER=1,
-	REQ_PING=2,
-	REQ_REPLY_PING=3,
-	REQ_SHUTDOWN=4,
-	REQ_CONFIRM_SHUTDOWN=5
+	REQ_NULL,
+	REQ_SEND_TICKET,
+	REQ_SEND_CONTAINER,
+	REQ_PING,
+	REQ_REPLY_PING,
+	REQ_SHUTDOWN,
+	REQ_CONFIRM_SHUTDOWN,
+	REQ_INFORM_NB_IN_CONTAINER
 };
 typedef enum req_t req_t;
 
@@ -178,11 +180,11 @@ void peli_sendIPC(long to, req_t request, long value)
  */
 Message peli_rcvIPC(int flag)
 {
-	Message letter;/*
+	Message letter;
 	letter.to = -1;
 	letter.from = -1;
-	letter.request = -1;
-	letter.value = -1;*/
+	letter.request = REQ_NULL;
+	letter.value = -1;
 	msgrcv(msgid, &letter, sizeof(Message) - sizeof(long), 1, flag);
 	return letter;
 }
@@ -421,51 +423,24 @@ void HMI ()
 int main(int argc, char **argv)
 {
 	int i;
-	Message tmp;
+	Message m;
 	unsigned int absolute = 1;
 
 	peli_initIPC();
 	node *N = peli_initTree(NULL, &absolute, 1, 5, 2);
 	peli_createWorkstation(N);
 	//HMI ();
-	for(i=2; i<absolute+1; i++)
-	{
-		printf("Envoie d'un PING à <%d>\n", i);
-		peli_sendIPC(i, REQ_PING, 0);
-	}
 	
-	for(i=2; i<absolute+1; i++)
-	{
-		tmp = peli_rcvIPC(0);
-		switch(tmp.request)
-		{
-			case REQ_REPLY_PING:
-				printf("<%ld> a répondu au PING\n", tmp.from);
-				break;
-			default:
-				printf("<%ld> a répondu : %d\n", tmp.from, tmp.request);
-				break;
-		}
-	}
-	
-	for(i=2; i<absolute+1; i++)
-	{
-		printf("Demande d'arrêt à <%d>\n", i);
-		peli_sendIPC(i, REQ_SHUTDOWN, 0);
-	}
+	sleep(1);
+	printf("~~~~\n%d\n~~~~\n", msgid);
+	sleep(2);
 
-	for(i=2; i<absolute+1; i++)
-	{
-		tmp = peli_rcvIPC(0);
-		switch(tmp.request)
-		{
-			case REQ_CONFIRM_SHUTDOWN:
-				printf("<%ld> c'est arrêté\n", tmp.from);
-				break;
-		}
-	}
+	m = peli_rcvIPC(0);
+	if(m.request == REQ_PING)
+		peli_sendIPC(m.from, REQ_REPLY_PING, 0);
 	
 	peli_deleteTree(N);
+	sleep(5);
 	peli_destroyIPC();
 	return 0;
 }

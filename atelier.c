@@ -135,69 +135,32 @@ int main(int argc, char **argv)
 	suppliersId = (int*) malloc(sizeof(int)*(argc-3));
 	nbSuppliers = argc-3;
 	container = (unsigned int**) malloc(sizeof(unsigned int*)*(nbSuppliers));
+
 	for(i=0; i<nbSuppliers; i++)
 	{
 		suppliersId[i] = atoi(argv[i+3]);
-		
 		container[i] = (unsigned int*) malloc(sizeof(unsigned int)*3);
 		container[i][0] = suppliersId[i];
 		container[i][1] = 0;
 		container[i][2] = 0;
 	}
 
-	/*peli_sendIPC(clientId, REQ_INFORM_NB_IN_CONTAINER, nbInContainer);
-	if(nbSuppliers>0)printf("[[%d]] send value '%d' to client %d\n", myId, nbInContainer, clientId);
-	fflush(stdout);
-	for(i=0; i<nbSuppliers; i++)
+	peli_sendIPC(clientId, REQ_PING, 0);
+	printf("= %d send ping to client %d\n", myId, clientId);
+	sleep(1);
+	for(i=0; i<nbSuppliers+1; i++)
 	{
-		do {
-			printf("{{%d}} wait\n", myId);
-			fflush(stdout);
-			m = peli_rcvIPC(0);
-			printf("{{%d}} recived\n\tto:%ld\n\tfrom:%ld\n\trequest:%d\n\tvalue:%ld\n", myId, m.to, m.from, m.request, m.value);
-			fflush(stdout);
-		}while(m.request != REQ_INFORM_NB_IN_CONTAINER);
-		printf("==%d== Start looping (%ld)\n", myId, m.from);
-		fflush(stdout);
-		j=0;
-		while(container[j][0] != m.from)
-			j++;
-		container[j][1] = m.value;
-		container[j][2] = m.value;
-		printf("==%d== End looping ([%d]%d)\n", myId, j, container[j][0]);
-		fflush(stdout);
-	}
-	if(nbSuppliers>0)printf("##%d## END OF INIT\n", myId);
-	fflush(stdout);*/
-	
-	peli_sendIPC(clientId, REQ_INFORM_NB_IN_CONTAINER, nbInContainer);
-	
-	
-	while(m.request != REQ_SHUTDOWN)
-	{
-		if(taskWaiting)
-			flag = IPC_NOWAIT;
-		else
-			flag = 0;
-		m = peli_rcvIPC(flag);
-		switch(m.request)
+		m = peli_rcvIPC(0);
+		if(m.request == REQ_PING)
 		{
-			case -1:
-				break;
-			case REQ_PING:
-				peli_sendIPC(m.from, REQ_REPLY_PING, m.value);
-				break;
-			case REQ_SEND_TICKET:
-				nbContainerToProduce++;
-				break;
-			case REQ_SEND_CONTAINER:
-				
-				break;
-			
+			printf("> %d recieved ping from %ld, send reply\n", myId, m.from);
+			peli_sendIPC(m.from, REQ_REPLY_PING, 0);
 		}
+		else if (m.request == REQ_REPLY_PING)
+			printf("< %d recieved reply from %ld\n", myId, m.from);
 	}
-
-	peli_sendIPC(1, REQ_CONFIRM_SHUTDOWN, 0);
+	sleep(1);
+	printf("= end of pings for %d\n", myId);
 
 	return 0;
 }
