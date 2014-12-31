@@ -31,8 +31,6 @@ int main(int argc, char **argv)
 	/* Declaration */
 	int i, j;
 	Message m;
-	bool taskWaiting = false;
-	int flag;
 	unsigned int nbSuppliers;
 	unsigned int nbContainerToProduce = 0;
 	unsigned int **container;
@@ -52,9 +50,10 @@ int main(int argc, char **argv)
 	for(i=0; i<nbSuppliers; i++)
 	{
 		suppliersId[i] = atoi(argv[i+3]);
-		container[i] = (unsigned int*) malloc(sizeof(unsigned int)*2);
+		container[i] = (unsigned int*) malloc(sizeof(unsigned int)*3);
 		container[i][0] = 0;
 		container[i][1] = 0;
+		container[i][2] = 0;
 	}
 
 
@@ -99,9 +98,44 @@ int main(int argc, char **argv)
 	/* Main Loop */
 	do
 	{
-		/* ... */
-		m.request = REQ_SHUTDOWN;
-	}while(m.request != REQ_SHUTDOWN)
+		if(nbContainerToProduce > 0)
+			m = ipc_rcv(IPC_NOWAIT);
+		else
+			m = ipc_rcv(0);
+		switch(m.request)
+		{
+			case REQ_NULL:
+				break;
+			case REQ_SEND_TICKET:
+				nbContainerToProduce++;
+				break;
+			case REQ_SEND_CONTAINER:
+				while(i < nbSuppliers)
+				{
+					if(suppliersId[i] == m.from)
+					{
+						if(container[i][0] == 0)
+							container[i][0] = m.value;
+						else if(container[i][1] == 0)
+							container[i][1] = m.value;
+						else
+							container[i][2] = m.value;
+						break;
+					}
+					i++;
+				}
+				break;
+			case REQ_PING:
+				ipc_send(m.from, REQ_REPLY_PING, m.value);
+				break;
+			case REQ_SHUTDOWN:
+				break;
+			default:
+				break;
+		}
+	}while(m.request != REQ_SHUTDOWN);
+
+	ipc_send(1, REQ_CONFIRM_SHUTDOWN, 0);
 
 	return 0;
 }

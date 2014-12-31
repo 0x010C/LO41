@@ -9,7 +9,7 @@
  */
 void ws_create(node *N)
 {
-	int i;
+	unsigned int i;
 	pid_t pid;
 	char **args = NULL;
 
@@ -51,11 +51,11 @@ void ws_create(node *N)
  * Description : Wait that all the WorkStations are ready, then send them a message to make them start
  * Parameters : the number of WorkStations	nbWS<unsigned int>
  * Return : 
- * ---------------------------
+ * -------------------------------
  */
 void ws_readyStart(unsigned int nbWS)
 {
-	int i = 0;
+	unsigned int i = 0;
 	Message m;
 
 	while(i<nbWS-1)
@@ -63,12 +63,34 @@ void ws_readyStart(unsigned int nbWS)
 		m = ipc_rcv(0);
 		if(m.request == REQ_READY)
 			i++;
-		printf("\t\t\t %d(%ld) get %d from %ld\n", myId, m.to, m.request, m.from);
 	}
-	printf("\n====================\nAll the ws are Ready, Sending REQ_START signal\n====================\n\n");
 	for(i=2;i<=nbWS;i++)
 	{
 		ipc_send(i, REQ_START, 0);
-		printf("\tSend START to %d\n", i);
+	}
+}
+
+/*
+ * -------- ws_shutdown --------
+ * Description : Tell all the WorkStations to shutdown and wait their confirmation
+ * Parameters : the number of WorkStations	nbWS<unsigned int>
+ * Return : 
+ * -----------------------------
+ */
+void ws_shutdown(unsigned int nbWS)
+{
+	unsigned int i = 0;
+	Message m;
+
+	for(i=2;i<=nbWS;i++)
+	{
+		ipc_send(i, REQ_SHUTDOWN, 0);
+	}
+	i=0;
+	while(i<nbWS-1)
+	{
+		m = ipc_rcv(0);
+		if(m.request == REQ_CONFIRM_SHUTDOWN)
+			i++;
 	}
 }

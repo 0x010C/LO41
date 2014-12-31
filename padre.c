@@ -29,18 +29,19 @@
 int main(int argc, char **argv)
 {
 	unsigned int nbWS = 1;
+	int i;
 
 	myId = 1;
 
 	ipc_init(true);
 	node *N = tree_init(NULL, &nbWS, 1, 5, 2);
-	printf("~~~~~~~~~~\n%d\n~~~~~~~~~~\n", nbWS);
 	sleep(1);
 	ws_create(N);
 
 	ws_readyStart(nbWS);
-
-	sleep(7);
+	
+	ws_shutdown(nbWS);
+	
 	tree_delete(N);
 	ipc_destroy();
 	return 0;
