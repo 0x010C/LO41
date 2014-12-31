@@ -28,8 +28,6 @@
 
 int main(int argc, char **argv)
 {
-	int i = 0;
-	Message m;
 	unsigned int nbWS = 1;
 	
 	myId = 1;
@@ -39,20 +37,8 @@ int main(int argc, char **argv)
 	printf("~~~~~~~~~~\n%d\n~~~~~~~~~~\n", nbWS);
 	sleep(1);
 	ws_create(N);
-
-	while(i<nbWS-1)
-	{
-		m = ipc_rcv(0);
-		if(m.request == REQ_READY)
-			i++;
-		printf("\t\t\t %d(%ld) get %d from %ld\n", myId, m.to, m.request, m.from);
-	}
-	printf("\n====================\nAll the ws are Ready, Sending REQ_START signal\n====================\n\n");
-	for(i=2;i<=nbWS;i++)
-	{
-		ipc_send(i, REQ_START, 0);
-		printf("\tSend START to %d\n", i);
-	}
+	
+	ws_readyStart(nbWS);
 	
 	sleep(7);
 	tree_delete(N);

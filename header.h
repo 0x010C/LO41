@@ -125,7 +125,9 @@ char *intToChar(int nb);
 node *tree_init(node *client, unsigned int *absoluteId, unsigned int deep, unsigned int deepMax, unsigned int breadth);
 void tree_display(node *N);
 void tree_delete(node *N);
+
 void ws_create(node *N);
+void ws_readyStart(unsigned int nbWS);
 
 void hmi_displayPelikanbanlogo();
 void hmi_createfactory();

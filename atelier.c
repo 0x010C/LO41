@@ -82,11 +82,9 @@ int main(int argc, char **argv)
 		nbInContainer = myId*7+rand()%7;
 	ipc_send(clientId, REQ_INFORM_NB_IN_CONTAINER, nbInContainer);
 	ipc_send(1, REQ_READY, 0);
-	printf("# %d is ready\n", myId);
 	do
 	{
 		m = ipc_rcv(0);
-		printf("# %d get %d from %ld\n", myId, m.request, m.from);
 	}while(m.request != REQ_START);
 	printf("# %d start working\n", myId);
 
