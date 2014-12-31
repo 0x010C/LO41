@@ -31,15 +31,17 @@ int main(int argc, char **argv)
 	/* Declaration */
 	int i, j;
 	Message m;
-	unsigned int nbSuppliers;
+	unsigned int nbSuppliers = 0;
 	unsigned int nbContainerToProduce = 0;
+	unsigned int nbPiecesProduced = 0;
 	unsigned int **container;
-	unsigned int nbInContainer;
+	unsigned int nbInContainer = 0;
+	bool needContainer = false;
 
 
 	/* IPC Initialisation */
 	ipc_init(false);
-	/* IDs initialisations based on the parameters */
+	/* IWIDs initialisations based on the parameters */
 	myId = atoi(argv[1]);
 	clientId = atoi(argv[2]);
 	suppliersId = (int*) malloc(sizeof(int)*(argc-3));
@@ -76,7 +78,7 @@ int main(int argc, char **argv)
 			}
 		}
 	}
-	/* Computation of the number of pieces per container */
+	/* Computation of the number of pieces per container, based on the current IWID */
 	if(myId == 2)
 		nbInContainer = 1;
 	else
@@ -95,19 +97,26 @@ int main(int argc, char **argv)
 	printf("# %d start working\n", myId);
 
 
-	/* Main Loop */
+	/*
+	 * =========
+	 * Main Loop
+	 * =========
+	 */
 	do
 	{
-		if(nbContainerToProduce > 0)
+		/* Receiving the messages (wait if there is nothing to do, dont in other cases) */
+		if(nbContainerToProduce > 0 && !needContainer)
 			m = ipc_rcv(IPC_NOWAIT);
 		else
 			m = ipc_rcv(0);
+
+		/* Analyse the message */
 		switch(m.request)
 		{
 			case REQ_NULL:
 				break;
 			case REQ_SEND_TICKET:
-				nbContainerToProduce++;
+				nbContainerToProduce += m.value;
 				break;
 			case REQ_SEND_CONTAINER:
 				while(i < nbSuppliers)
@@ -132,6 +141,54 @@ int main(int argc, char **argv)
 				break;
 			default:
 				break;
+		}
+		
+		needContainer = false;
+		
+		/* If there is something to produce */
+		if(nbContainerToProduce > 0)
+		{
+			/* Check if there is no leak of pieces */
+			for(i=0; i<nbSuppliers; i++)
+			{
+				if(container[i][0] == 0)
+				{
+					needContainer = true;
+					break;
+				}
+			}
+			/* If not, we can produce */
+			if(!needContainer)
+			{
+				/* We take one piece from each suppliers' container */
+				for(i=0; i<nbSuppliers; i++)
+				{
+					container[i][0]--;
+					/* If the container 0 became empty, we ask our supplier a new one and we transfert the content from the other containers */
+					if(container[i][0] == 0)
+					{
+						ipc_send(suppliersId[i], REQ_SEND_TICKET, 1); /*TODO: Send it when we open the container at the beginning*/
+
+						container[i][0] = container[i][1];
+						container[i][1] = container[i][2];
+						container[i][2] = 0;
+					}
+				}
+				/* ... Factory work ... */
+				/* Our piece is built */
+				nbPiecesProduced++;
+				/* ... Factory work ... */
+				
+				/* If a container is filled */
+				if(nbPiecesProduced == nbInContainer)
+				{
+					/* We send the container to our client */
+					ipc_send(clientId, REQ_SEND_CONTAINER, nbPiecesProduced);
+					/* Actualisation of the factory's datas */
+					nbPiecesProduced = 0;
+					nbContainerToProduce--;
+				}
+			}
 		}
 	}while(m.request != REQ_SHUTDOWN);
 

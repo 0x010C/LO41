@@ -128,6 +128,7 @@ void tree_delete(node *N);
 
 void ws_create(node *N);
 void ws_readyStart(unsigned int nbWS);
+void ws_shutdown(unsigned int nbWS);
 
 void hmi_displayPelikanbanlogo();
 void hmi_createfactory();
