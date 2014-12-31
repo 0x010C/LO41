@@ -30,17 +30,17 @@ int main(int argc, char **argv)
 {
 	int i = 0;
 	Message m;
-	unsigned int absolute = 1;
+	unsigned int nbWS = 1;
 	
 	myId = 1;
 
 	ipc_init(true);
-	node *N = tree_init(NULL, &absolute, 1, 5, 2);
-	printf("~~~~~~~~~~\n%d\n~~~~~~~~~~\n", absolute);
+	node *N = tree_init(NULL, &nbWS, 1, 5, 2);
+	printf("~~~~~~~~~~\n%d\n~~~~~~~~~~\n", nbWS);
 	sleep(1);
 	ws_create(N);
 
-	while(i<absolute-1)
+	while(i<nbWS-1)
 	{
 		m = ipc_rcv(0);
 		if(m.request == REQ_READY)
@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 		printf("\t\t\t %d(%ld) get %d from %ld\n", myId, m.to, m.request, m.from);
 	}
 	printf("\n====================\nAll the ws are Ready, Sending REQ_START signal\n====================\n\n");
-	for(i=2;i<=absolute;i++)
+	for(i=2;i<=nbWS;i++)
 	{
 		ipc_send(i, REQ_START, 0);
 		printf("\tSend START to %d\n", i);
