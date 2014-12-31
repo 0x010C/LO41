@@ -60,16 +60,16 @@ int main(int argc, char **argv)
 		m = ipc_rcv(0);
 		if(m.request == REQ_INFORM_NB_IN_CONTAINER)
 		{
-			printf("> %d recieved info from %ld (%ld)\n", myId, m.from, m.value);
+			//printf("> %d recieved info from %ld (%ld)\n", myId, m.from, m.value);
 			j=0;
 			while(j < nbSuppliers)
 			{
-				printf("\t\t[%d : %d <> %ld]\n", myId, suppliersId[j], m.from);
+				//printf("\t\t[%d : %d <> %ld]\n", myId, suppliersId[j], m.from);
 				if(suppliersId[j] == m.from)
 				{
 					container[j][0] = m.value;
 					container[j][1] = m.value;
-					printf("\t{%d saved value %ld in suppliers %d}\n", myId, m.value,suppliersId[j]);
+					//printf("\t{%d saved value %ld in suppliers %d}\n", myId, m.value,suppliersId[j]);
 					break;
 				}
 				j++;
@@ -80,11 +80,15 @@ int main(int argc, char **argv)
 		nbInContainer = 1;
 	else
 		nbInContainer = myId*7+rand()%7;
-	sleep(1);
-	printf("< %d send info %d to %d\n", myId, nbInContainer, clientId);
 	ipc_send(clientId, REQ_INFORM_NB_IN_CONTAINER, nbInContainer);
-	sleep(2);
-	printf("= end of transmissions for %d\n", myId);
+	ipc_send(1, REQ_READY, 0);
+	printf("# %d is ready\n", myId);
+	do
+	{
+		m = ipc_rcv(0);
+		printf("# %d get %d from %ld\n", myId, m.request, m.from);
+	}while(m.request != REQ_START);
+	printf("# %d start working\n", myId);
 
 	return 0;
 }

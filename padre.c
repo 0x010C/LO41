@@ -28,7 +28,7 @@
 
 int main(int argc, char **argv)
 {
-	int i;
+	int i = 0;
 	Message m;
 	unsigned int absolute = 1;
 	
@@ -36,19 +36,26 @@ int main(int argc, char **argv)
 
 	ipc_init(true);
 	node *N = tree_init(NULL, &absolute, 1, 5, 2);
-	ws_create(N);
-	//HMI ();
-	
+	printf("~~~~~~~~~~\n%d\n~~~~~~~~~~\n", absolute);
 	sleep(1);
-	printf("~~~~\n%d\n~~~~\n", msgid);
-	sleep(2);
+	ws_create(N);
 
-	m = ipc_rcv(0);
-	if(m.request == REQ_PING)
-		ipc_send(m.from, REQ_REPLY_PING, 0);
+	while(i<absolute-1)
+	{
+		m = ipc_rcv(0);
+		if(m.request == REQ_READY)
+			i++;
+		printf("\t\t\t %d(%ld) get %d from %ld\n", myId, m.to, m.request, m.from);
+	}
+	printf("\n====================\nAll the ws are Ready, Sending REQ_START signal\n====================\n\n");
+	for(i=2;i<=absolute;i++)
+	{
+		ipc_send(i, REQ_START, 0);
+		printf("\tSend START to %d\n", i);
+	}
 	
-	tree_delete(N);
 	sleep(7);
+	tree_delete(N);
 	ipc_destroy();
 	return 0;
 }
