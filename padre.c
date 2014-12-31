@@ -30,6 +30,7 @@ int main(int argc, char **argv)
 {
 	unsigned int nbWS = 1;
 	int i;
+	Message m;
 
 	myId = 1;
 
@@ -39,7 +40,14 @@ int main(int argc, char **argv)
 	ws_create(N);
 
 	ws_readyStart(nbWS);
-	
+
+	ipc_send(2, REQ_SEND_TICKET, 1000);
+	for(i=0; i<1000; i++)
+		do{
+			m = ipc_rcv(0);
+		}
+		while(m.request != REQ_SEND_CONTAINER);
+
 	ws_shutdown(nbWS);
 	
 	tree_delete(N);
