@@ -29,7 +29,7 @@
 int main(int argc, char **argv)
 {
 	unsigned int nbWS = 1;
-	
+
 	myId = 1;
 
 	ipc_init(true);
@@ -37,9 +37,9 @@ int main(int argc, char **argv)
 	printf("~~~~~~~~~~\n%d\n~~~~~~~~~~\n", nbWS);
 	sleep(1);
 	ws_create(N);
-	
+
 	ws_readyStart(nbWS);
-	
+
 	sleep(7);
 	tree_delete(N);
 	ipc_destroy();

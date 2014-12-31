@@ -28,9 +28,9 @@
 
 int main(int argc, char **argv)
 {
+	/* Declaration */
 	int i, j;
 	Message m;
-	m.request = -1;
 	bool taskWaiting = false;
 	int flag;
 	unsigned int nbSuppliers;
@@ -38,8 +38,10 @@ int main(int argc, char **argv)
 	unsigned int **container;
 	unsigned int nbInContainer;
 
-	ipc_init(false);
 
+	/* IPC Initialisation */
+	ipc_init(false);
+	/* IDs initialisations based on the parameters */
 	myId = atoi(argv[1]);
 	clientId = atoi(argv[2]);
 	suppliersId = (int*) malloc(sizeof(int)*(argc-3));
@@ -55,38 +57,51 @@ int main(int argc, char **argv)
 		container[i][1] = 0;
 	}
 
+
+	/* Reception from the suppliers of the number of pieces per container */
 	for(i=0; i<nbSuppliers; i++)
 	{
 		m = ipc_rcv(0);
 		if(m.request == REQ_INFORM_NB_IN_CONTAINER)
 		{
-			//printf("> %d recieved info from %ld (%ld)\n", myId, m.from, m.value);
 			j=0;
 			while(j < nbSuppliers)
 			{
-				//printf("\t\t[%d : %d <> %ld]\n", myId, suppliersId[j], m.from);
 				if(suppliersId[j] == m.from)
 				{
 					container[j][0] = m.value;
 					container[j][1] = m.value;
-					//printf("\t{%d saved value %ld in suppliers %d}\n", myId, m.value,suppliersId[j]);
 					break;
 				}
 				j++;
 			}
 		}
 	}
+	/* Computation of the number of pieces per container */
 	if(myId == 2)
 		nbInContainer = 1;
 	else
 		nbInContainer = myId*7+rand()%7;
+	/* Transmission to the client of the number of pieces per container */
 	ipc_send(clientId, REQ_INFORM_NB_IN_CONTAINER, nbInContainer);
+
+
+	/* Send READY Message */
 	ipc_send(1, REQ_READY, 0);
+	/* And wait for the START signal */
 	do
 	{
 		m = ipc_rcv(0);
 	}while(m.request != REQ_START);
 	printf("# %d start working\n", myId);
+
+
+	/* Main Loop */
+	do
+	{
+		/* ... */
+		m.request = REQ_SHUTDOWN;
+	}while(m.request != REQ_SHUTDOWN)
 
 	return 0;
 }
