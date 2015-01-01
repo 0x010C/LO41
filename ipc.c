@@ -18,8 +18,17 @@ void ipc_init(bool create)
 
 	if(msgid == -1)
 	{
-		printf("Error : Cannot create an IPC object\n");
-		exit(1);
+		if(create)
+		{
+			msgid = msgget(ftok("PeliKanban", 42), 0);
+			ipc_destroy();
+			msgid = msgget(ftok("PeliKanban", 42), flag);
+		}
+		if(msgid == -1)
+		{
+			printf("Error : Cannot create an IPC object\n");
+			exit(1);
+		}
 	}
 }
 
