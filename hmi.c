@@ -50,25 +50,61 @@ void hmi_menu()
 {
 	int choice;
 	hmi_displayPelikanbanlogo();
+	
+	do
+	{
+		printf("\n Please select an option :\n");
+		//what function tell you there is a factory ?
+		if (0)
+		{
+			printf("1 - Create a factory\n");
+			printf("9 - Quit\n");
+			printf("Your Choice : ");
+			scanf("%d",&choice);
+			//printf("%d\n", choice);
+			while(choice != 1 && choice != 9)
+			{
+				printf("Wrong input, Please try again\nYour Choice : ");
+				
+				printf("\n");
+			}
+			switch(choice)
+			{
+				case 1:
+					hmi_createfactory();
+					printf("Factory Created\n\n");
+					break;
+				case 9:  //a redefinir
+					break;
+			}
+		} else {
+			printf("1 - Launch the production\n");
+			printf("2 - Display the tree of the production line\n");
+			printf("3 - Something funny to do ?\n");
+			printf("9 - Quit\n");
 
-	printf("\n Please select an option :\n");
-	printf("1 - Create a factory\n");
-	printf("9 - Quit\n");
-	printf("Your Choice : ");
-	scanf("%d",&choice);
-	printf("%d\n", choice);
-	while(choice != 1 && choice != 9)
-	{
-		printf("Wrong input, Please try again\nYour Choice : ");
-		scanf("%d",&choice);
-		printf("\n");
+			printf("Your Choice : ");
+			scanf("%d",&choice);
+			//printf("%d\n", choice);
+			while(choice != 1 && choice != 2 && choice != 3 && choice != 9)
+			{
+				printf("Wrong input, Please try again\nYour Choice : ");
+				scanf("%d",&choice);
+				//printf("\n");
+			}
+			switch(choice)
+			{
+				case 1:
+					printf("How many things do you want to produce ?")
+					hmi_launchprod(nbprod)
+					printf("Factory Created\n\n");
+					break;
+				case 9: 
+					printf(" Oh come on ! Stay a litle bit more with us ! We have cookies !\n");
+					break;
+			}
+		}
+
 	}
-	switch(choice)
-	{
-		case 1:
-			hmi_createfactory();
-			break;
-		case 9:  //a redefinir
-			break;
-	}
+	while(choice != 9);
 }
