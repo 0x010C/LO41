@@ -39,9 +39,9 @@ void hmi_createfactory()
 	printf("%d\n", suppliers);
 	printf("Thank you ! Initialization in process\n");
 
-	peli_initIPC();
-	node *N = peli_initTree(NULL, &absolute, 1, depth, suppliers);
-	peli_createWorkstation(N);
+	ipc_init(0);
+	node *N = tree_init(NULL, &absolute, 1, depth, suppliers);
+	ws_create(N);
 	printf("Initialization Completed\n");
 
 }
@@ -49,7 +49,7 @@ void hmi_createfactory()
 void hmi_menu()
 {
 	int choice;
-	displayPelikanbanlogo();
+	hmi_displayPelikanbanlogo();
 
 	printf("\n Please select an option :\n");
 	printf("1 - Create a factory\n");
@@ -66,8 +66,9 @@ void hmi_menu()
 	switch(choice)
 	{
 		case 1:
-			HMI_createfactory();
+			hmi_createfactory();
 			break;
 		case 9:  //a redefinir
 			break;
+	}
 }
