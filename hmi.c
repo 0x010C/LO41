@@ -29,7 +29,7 @@ void hmi_displayPelikanbanlogo()
 
 unsigned int hmi_createfactory(unsigned int nbWS, node *N)
 {	
-	unsigned int absolute = 1, depth, suppliers;
+	unsigned int depth, suppliers;
 	printf("To create a factory, you need to imput some parameters to define the production line :\n");
 	printf(" -> The depth of the production line : ");
 	scanf("%d",&depth);
@@ -39,7 +39,7 @@ unsigned int hmi_createfactory(unsigned int nbWS, node *N)
 	printf("%d\n", suppliers);
 	printf("Thank you ! Initialization in process\n");
 
-	N = tree_init(NULL, &absolute, 1, depth, suppliers);
+	N = tree_init(NULL, &nbWS, 1, depth, suppliers);
 	sleep(1);
 	ws_create(N);
 
@@ -86,22 +86,22 @@ void hmi_menu()
 			printf("1 - Create a factory\n");
 			printf("9 - Quit\n");
 			printf("Your Choice : ");
-			scanf("%d",&choice);
+			fflush(stdin);
+			choice = getchar();
+			while(getchar() != '\n');
 			//printf("%d\n", choice);
-			while(choice != 1 && choice != 9)
-			{
-				printf("Wrong input, Please try again\nYour Choice : ");
-				
-				printf("\n");
-			}
+
 			switch(choice)
 			{
-				case 1:
+				case '1':
 					nbWS = hmi_createfactory(nbWS, N);
 					factory = true;
 					printf("Factory Created\n\n");
 					break;
-				case 9:  //a redefinir
+				case '9':  //a redefinir
+					break;
+				default:
+					printf("Wrong input, Please try again\n");
 					break;
 			}
 		} else {
@@ -111,40 +111,40 @@ void hmi_menu()
 			printf("9 - Quit\n");
 
 			printf("Your Choice : ");
-			scanf("%d",&choice);
+			fflush(stdin);
+			choice = getchar();
+			while(getchar() != '\n');
 			printf("\n");
-			while(choice != 1 && choice != 2 && choice != 3 && choice != 9)
-			{
-				printf("Wrong input, Please try again\nYour Choice : ");
-				scanf("%d",&choice);
-				printf("\n");
-			}
 			switch(choice)
 			{
-				case 1:
+				case '1':
 					printf("How many things do you want to produce ? >");
 					scanf("%ld",&things);
-					printf("%ld");
+					printf("\n %ld", things);
+					fflush(stdout);
 					hmi_launchprod(things);
 					printf("Production finished\n\n");
 					break;
-				case 2:
+				case '2':
 					printf("Display of the factory\n\n");
 					tree_display(N);
 					break;
-				case 3:
+				case '3':
 					printf("Deleting of the production line un progress\n");
 					hmi_shutdown(nbWS, N);
 					factory = false;
 					printf("Factory Deleted\n\n");
 					break;
 
-				case 9: 
+				case '9': 
 					printf(" Oh come on ! Stay a litle bit more with us ! We have cookies !\n");
+					break;
+				default:
+					printf("Wrong input, Please try again\n");
 					break;
 			}
 		}
 
 	}
-	while(choice != 9);
+	while(choice != '9');
 }
