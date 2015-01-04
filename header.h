@@ -131,7 +131,9 @@ void ws_readyStart(unsigned int nbWS);
 void ws_shutdown(unsigned int nbWS);
 
 void hmi_displayPelikanbanlogo();
-void hmi_createfactory();
+unsigned int hmi_createfactory(unsigned int nbWS, node *N);
+void hmi_launchprod(long things);
+void hmi_shutdown(unsigned int nbWS, node *N);
 void hmi_menu();
 
 

@@ -28,32 +28,12 @@
 
 int main(int argc, char **argv)
 {
-	unsigned int nbWS = 1;
-	int i;
-	Message m;
 
 	myId = 1;
 
 	ipc_init(true);
-	node *N = tree_init(NULL, &nbWS, 1, 6, 5);
-	sleep(1);
-	ws_create(N);
+	hmi_menu();
 
-	ws_readyStart(nbWS);
-
-	ipc_send(2, REQ_SEND_TICKET, 100000);
-	for(i=0; i<100000; i++)
-		do{
-			m = ipc_rcv(0);
-		}
-		while(m.request != REQ_SEND_CONTAINER);
-
-	printf("\n==========\n   END\n==========\n\n");
-
-	ws_shutdown(nbWS);
-	printf("\n==========\n   END\n==========\n\n");
-	
-	tree_delete(N);
 	ipc_destroy();
 	return 0;
 }
