@@ -44,6 +44,7 @@ unsigned int hmi_createfactory(unsigned int nbWS, node *N)
 	ws_create(N);
 
 	ws_readyStart(nbWS);
+	sleep(1);
 	printf("Initialization Completed\n");
 	return nbWS;
 }
@@ -51,15 +52,19 @@ unsigned int hmi_createfactory(unsigned int nbWS, node *N)
 
 void hmi_launchprod(long nb)
 {
+	printf("Launch of the Production ; %ld things to produce \n", nb);
 	Message m;
 	int i;
 	
 	ipc_send(2, REQ_SEND_TICKET, nb);
 	for(i=0; i<nb; i++)
+	{
 		do{
 			m = ipc_rcv(0);
 		}
 		while(m.request != REQ_SEND_CONTAINER);
+		printf("Product %d on %ld done\n !", i+1, nb);
+	}
 }
 
 
@@ -86,7 +91,6 @@ void hmi_menu()
 			printf("1 - Create a factory\n");
 			printf("9 - Quit\n");
 			printf("Your Choice : ");
-			fflush(stdin);
 			choice = getchar();
 			while(getchar() != '\n');
 			//printf("%d\n", choice);
@@ -111,7 +115,6 @@ void hmi_menu()
 			printf("9 - Quit\n");
 
 			printf("Your Choice : ");
-			fflush(stdin);
 			choice = getchar();
 			while(getchar() != '\n');
 			printf("\n");
@@ -120,7 +123,7 @@ void hmi_menu()
 				case '1':
 					printf("How many things do you want to produce ? >");
 					scanf("%ld",&things);
-					printf("\n %ld", things);
+					//printf("\n %ld", things);
 					fflush(stdout);
 					hmi_launchprod(things);
 					printf("Production finished\n\n");
@@ -138,6 +141,13 @@ void hmi_menu()
 
 				case '9': 
 					printf(" Oh come on ! Stay a litle bit more with us ! We have cookies !\n");
+					if(factory == true)
+					{
+						printf("In Addition, you didn't delete the factory before quitting... You're a bad person !\n Launch sequence of self-destruction\n");
+						hmi_shutdown(nbWS, N);
+						factory = false;
+					}
+					printf("Farewell!\n\n");
 					break;
 				default:
 					printf("Wrong input, Please try again\n");

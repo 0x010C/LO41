@@ -104,7 +104,6 @@ int main(int argc, char **argv)
 	 * Main Loop
 	 * =========
 	 */
-	sleep(1);
 	do
 	{
 		if(myId == 2)
