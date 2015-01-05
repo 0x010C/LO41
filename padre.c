@@ -28,6 +28,8 @@
 
 int main(int argc, char **argv)
 {
+	node *N;
+	unsigned int nbWS = 1;
 
 	myId = 1;
 

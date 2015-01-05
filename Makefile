@@ -15,7 +15,7 @@ A_EXESOURCECFILE = $(A_EXESOURCE:=.c)
 # export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:.
 
 #Generating the executable
-all: padre atelier
+all: clean padre atelier
 	@echo "\n--> Done :)"
 	
 padre:
@@ -31,5 +31,5 @@ exec: all
 
 #Cleaning the content of the current directory
 clean:
-	@echo "\n Cleaning temporary files"
+	@echo "\n--> Cleaning ..."
 	rm -rf *.o *~ *.save *.exe padre atelier

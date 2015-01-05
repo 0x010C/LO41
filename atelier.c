@@ -106,12 +106,6 @@ int main(int argc, char **argv)
 	 */
 	do
 	{
-		if(myId == 2)
-		{
-			printf("--> nbContainerToProduce:%d\n", nbContainerToProduce);
-			printf("--> nbPiecesProduced:%d\n", nbPiecesProduced);
-			printf("--> nbInContainer:%d\n\n", nbInContainer);
-		}
 		needContainer = false;
 
 		/* If there is something to produce */

@@ -27,7 +27,7 @@ void hmi_displayPelikanbanlogo()
 }
 
 
-unsigned int hmi_createfactory(unsigned int nbWS, node *N)
+unsigned int hmi_createfactory(unsigned int nbWS, node **N)
 {	
 	unsigned int depth, suppliers;
 	printf("To create a factory, you need to imput some parameters to define the production line :\n");
@@ -39,31 +39,34 @@ unsigned int hmi_createfactory(unsigned int nbWS, node *N)
 	printf("%d\n", suppliers);
 	printf("Thank you ! Initialization in process\n");
 
-	N = tree_init(NULL, &nbWS, 1, depth, suppliers);
+	*N = tree_init(NULL, &nbWS, 1, depth, suppliers);
 	sleep(1);
-	ws_create(N);
+	ws_create(*N);
 
 	ws_readyStart(nbWS);
 	sleep(1);
 	printf("Initialization Completed\n");
+	printf("###\n%p\n###\n", N);
+	
 	return nbWS;
 }
 
 
 void hmi_launchprod(long nb)
 {
-	printf("Launch of the Production ; %ld things to produce \n", nb);
 	Message m;
 	int i;
+
+	printf("Launch of the Production ; %ld things to produce \n", nb);
 	
 	ipc_send(2, REQ_SEND_TICKET, nb);
-	for(i=0; i<nb; i++)
+	for(i=1; i<=nb; i++)
 	{
 		do{
 			m = ipc_rcv(0);
 		}
 		while(m.request != REQ_SEND_CONTAINER);
-		printf("Product %d on %ld done\n !", i+1, nb);
+		printf("Product %d on %ld done\n !", i, nb);
 	}
 }
 
@@ -79,7 +82,7 @@ void hmi_menu()
 	bool factory = false;
 	long things;
 	unsigned int nbWS = 1;
-	node *N;
+	node *N = NULL;
 	hmi_displayPelikanbanlogo();
 	
 	do
@@ -98,7 +101,7 @@ void hmi_menu()
 			switch(choice)
 			{
 				case '1':
-					nbWS = hmi_createfactory(nbWS, N);
+					nbWS = hmi_createfactory(nbWS, &N);
 					factory = true;
 					printf("Factory Created\n\n");
 					break;
