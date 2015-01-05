@@ -80,11 +80,11 @@ int main(int argc, char **argv)
 		}
 	}
 	/* Computation of the number of pieces per container, based on the current IWID */
-	/*if(myId == 2)
-		nbInContainer = 10;
+	if(myId == 2)
+		nbInContainer = 1;
 	else
-		nbInContainer = myId*7+rand()%7;*/
-	nbInContainer = myId;
+		nbInContainer = myId*7+rand()%7;
+	//nbInContainer = myId;
 	/* Transmission to the client of the number of pieces per container */
 	ipc_send(clientId, REQ_INFORM_NB_IN_CONTAINER, nbInContainer);
 

@@ -85,12 +85,18 @@ void ws_shutdown(unsigned int nbWS)
 	for(i=2;i<=nbWS;i++)
 	{
 		ipc_send(i, REQ_SHUTDOWN, 0);
+		printf("# send SHUTDOWN message to %d\n", i);
 	}
 	i=0;
 	while(i<nbWS-1)
 	{
 		m = ipc_rcv(0);
 		if(m.request == REQ_CONFIRM_SHUTDOWN)
+		{
+			printf("\t& %ld correctly SH\n", m.from);
 			i++;
+		}
+		else
+			printf("\t\t{%ld send message %d}\n", m.from, m.request);
 	}
 }

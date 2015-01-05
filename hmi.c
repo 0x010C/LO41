@@ -36,6 +36,7 @@ unsigned int hmi_createfactory(unsigned int nbWS, node **N)
 	printf("%d\n", depth);
 	printf(" -> The number of supplier workshops per workshop : ");
 	scanf("%d",&suppliers);
+	while(getchar() != '\n');
 	printf("%d\n", suppliers);
 	printf("Thank you ! Initialization in process\n");
 
@@ -46,7 +47,6 @@ unsigned int hmi_createfactory(unsigned int nbWS, node **N)
 	ws_readyStart(nbWS);
 	sleep(1);
 	printf("Initialization Completed\n");
-	printf("###\n%p\n###\n", N);
 	
 	return nbWS;
 }
@@ -96,7 +96,6 @@ void hmi_menu()
 			printf("Your Choice : ");
 			choice = getchar();
 			while(getchar() != '\n');
-			//printf("%d\n", choice);
 
 			switch(choice)
 			{
@@ -105,7 +104,7 @@ void hmi_menu()
 					factory = true;
 					printf("Factory Created\n\n");
 					break;
-				case '9':  //a redefinir
+				case '9':
 					break;
 				default:
 					printf("Wrong input, Please try again\n");
@@ -126,10 +125,10 @@ void hmi_menu()
 				case '1':
 					printf("How many things do you want to produce ? >");
 					scanf("%ld",&things);
-					//printf("\n %ld", things);
-					fflush(stdout);
+					while(getchar() != '\n');
 					hmi_launchprod(things);
 					printf("Production finished\n\n");
+					sleep(1);
 					break;
 				case '2':
 					printf("Display of the factory\n\n");
