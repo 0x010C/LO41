@@ -43,7 +43,7 @@ int main(int argc, char **argv)
 
 	/* IPC Initialisation */
 	ipc_init(false);
-	/* IWIDs initialisations based on the parameters */
+	/* Internal workstation IDs initialisations based on the parameters */
 	myId = atoi(argv[1]);
 	clientId = atoi(argv[2]);
 	nbSuppliers = argc-3;
@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 		nbInContainer = 1;
 	else
 		nbInContainer = myId*7+rand()%7;
-	//nbInContainer = myId;
+
 	/* Transmission to the client of the number of pieces per container */
 	ipc_send(clientId, REQ_INFORM_NB_IN_CONTAINER, nbInContainer);
 
@@ -187,11 +187,13 @@ int main(int argc, char **argv)
 		}
 	}while(m.request != REQ_SHUTDOWN);
 
+	/* Free all the dynamicaly allocated memory */
 	free(suppliersId);
 	free(nbFullContainer);
 	free(nbInOpenedContainer);
 	free(nbInOtherContainer);
 	
+	/* Tell the padre that this process has finished */
 	sleep(2);
 	ipc_send(1, REQ_CONFIRM_SHUTDOWN, 0);
 

@@ -73,8 +73,8 @@ void hmi_launchprod(long nb)
 
 void hmi_shutdown(unsigned int nbWS, node *N)
 {
-	ws_shutdown(nbWS);
 	tree_delete(N);
+	ws_shutdown(nbWS);
 }
 void hmi_menu()
 {
@@ -114,7 +114,6 @@ void hmi_menu()
 			printf("1 - Launch the production\n");
 			printf("2 - Display the tree of the production line\n");
 			printf("3 - Delete the production line\n");
-			printf("9 - Quit\n");
 
 			printf("Your Choice : ");
 			choice = getchar();
@@ -135,20 +134,16 @@ void hmi_menu()
 					tree_display(N);
 					break;
 				case '3':
-					printf("Deleting of the production line un progress\n");
+					printf("Deleting of the production line in progress\n");
 					hmi_shutdown(nbWS, N);
 					factory = false;
 					printf("Factory Deleted\n\n");
+					choice = '9';
+					printf("Farewell!\n\n");
 					break;
 
 				case '9': 
 					printf(" Oh come on ! Stay a litle bit more with us ! We have cookies !\n");
-					if(factory == true)
-					{
-						printf("In Addition, you didn't delete the factory before quitting... You're a bad person !\n Launch sequence of self-destruction\n");
-						hmi_shutdown(nbWS, N);
-						factory = false;
-					}
 					printf("Farewell!\n\n");
 					break;
 				default:

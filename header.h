@@ -116,20 +116,24 @@ struct Message
  * HEADERS
  * ----------------------------
 */
+/* ipc.c */
 void ipc_init(bool create);
 void ipc_destroy();
 void ipc_send(long to, req_t request, long value);
 Message ipc_rcv(int flag);
 
+/* processTree.c */
 char *intToChar(int nb);
 node *tree_init(node *client, unsigned int *absoluteId, unsigned int deep, unsigned int deepMax, unsigned int breadth);
 void tree_display(node *N);
 void tree_delete(node *N);
 
+/* workstation.c */
 void ws_create(node *N);
 void ws_readyStart(unsigned int nbWS);
 void ws_shutdown(unsigned int nbWS);
 
+/* hmi.c */
 void hmi_displayPelikanbanlogo();
 unsigned int hmi_createfactory(unsigned int nbWS, node **N);
 void hmi_launchprod(long things);

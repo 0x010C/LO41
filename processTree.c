@@ -86,12 +86,9 @@ void tree_display(node *N)
 	if(N == NULL)
 		return;
 	printf("\n");
-	for(i=0; i<N->deep; i++)
+	for(i=1; i<N->deep; i++)
 		printf("\t");
-	printf("-->%d!%ld!%d", N->id, (long) N->pid, N->nbSuppliers);
-	if(N->nbSuppliers > 0)
-		printf("(%d!%d)", N->suppliers[0]->id, N->suppliers[1]->id);
-	printf("\n");
+	printf("--> %d!%ld\n", N->id, (long) N->pid);
 	
 	for(i=0; i<N->nbSuppliers; i++)
 		tree_display(N->suppliers[i]);
