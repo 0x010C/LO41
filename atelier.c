@@ -187,6 +187,12 @@ int main(int argc, char **argv)
 		}
 	}while(m.request != REQ_SHUTDOWN);
 
+	free(suppliersId);
+	free(nbFullContainer);
+	free(nbInOpenedContainer);
+	free(nbInOtherContainer);
+	
+	sleep(2);
 	ipc_send(1, REQ_CONFIRM_SHUTDOWN, 0);
 
 	return 0;
